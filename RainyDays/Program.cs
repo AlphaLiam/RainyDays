@@ -52,9 +52,25 @@ namespace RainyDays
                         Input single = new Input();
                         IEnumerable<Input> inputData = csvReader.EnumerateRecords(single);
                         List<Output> outputData = new List<Output>();
+                        int row = 0;
                         foreach (Input input in inputData)
                         {
-                            string json = requestData(input.Date, input.Latitude, input.Longitude);
+                            string json;
+                            while (true)
+                            {
+                                json = requestData(input.Date, input.Latitude, input.Longitude);
+                                if (json == null)
+                                {
+                                    //Console.Write("\n");
+                                    Console.WriteLine("Limit reached, waiting to continue.");
+                                    System.Threading.Thread.Sleep(20000);
+                                } else
+                                {
+                                    break;
+                                }
+                            }
+                            Console.Write(row + ": " + input.Date + ", " + input.Latitude + ", " + input.Longitude + "\n");
+                            row++;
                             WeatherHistJSON? hist = JsonSerializer.Deserialize<WeatherHistJSON>(json);
                             if (hist == null)
                             {
@@ -64,11 +80,11 @@ namespace RainyDays
                             {
                                 // Get total amount of rain for week
                                 float totalRain = 0.0f;
-                                for (int i = 0; i < hist.daily.rain_sum.Count; i++)
+                                for (int j = 0; j < hist.daily.rain_sum.Count; j++)
                                 {
-                                    if (hist.daily.rain_sum[i] != null)
+                                    if (hist.daily.rain_sum[j] != null)
                                     {
-                                        totalRain += (float)hist.daily.rain_sum[i];
+                                        totalRain += (float)hist.daily.rain_sum[j];
                                     }
                                 }
 
